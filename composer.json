@@ -1,0 +1,37 @@
+{
+    "name": "andydune/task-lock",
+    "description": "Usefull for control tasks to avoid parallel job. It support MongoDB or files.",
+    "license": "MIT",
+    "keywords": [
+        "php",
+        "cron",
+        "task"
+    ],
+    "authors": [
+        {
+            "name": "Andrey Ryzhov",
+            "email": "info@rznw.ru"
+        }
+    ],
+    "homepage": "https://github.com/AndyDune/ConditionalExecution",
+    "autoload": {
+        "psr-4": {
+            "AndyDune\\TaskLock\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^7",
+        "andydune/conditional-execution": "^1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7.15 || ^6.0.8",
+        "mongodb/mongodb": "^1.1"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload-dev": {
+        "psr-4": {
+            "AndyDuneTest\\TaskLock\\": "test/"
+        }
+    }
+}

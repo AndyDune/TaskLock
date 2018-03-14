@@ -7,3 +7,27 @@
 
 
 Usefull for control tasks to avoid parallel job. It support MongoDB or files.
+
+Installation
+------------
+
+Installation using composer:
+
+```
+composer require andydune/task-lock 
+```
+Or if composer didn't install globally:
+```
+php composer.phar require andydune/task-lock
+```
+Or edit your `composer.json`:
+```
+"require" : {
+     "andydune/task-lock": "^1"
+}
+
+```
+And execute command:
+```
+php composer.phar update
+```

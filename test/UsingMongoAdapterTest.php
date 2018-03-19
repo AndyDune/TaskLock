@@ -12,6 +12,7 @@
 
 
 namespace AndyDuneTest\TaskLock;
+
 use AndyDune\TaskLock\Adapter\Mongo;
 use AndyDune\TaskLock\Collection;
 use AndyDune\TaskLock\Instance;
@@ -22,7 +23,7 @@ class UsingMongoAdapterTest extends TestCase
 {
     public function testEmpty()
     {
-        $mongo =  new \MongoDB\Client();
+        $mongo = new \MongoDB\Client();
         $collectionDb = $mongo->selectDatabase('test')->selectCollection('test');
         $adapter = new Mongo();
         $adapter->setCollection($collectionDb);
@@ -60,4 +61,18 @@ class UsingMongoAdapterTest extends TestCase
         $this->assertTrue($instance->isReady());
     }
 
+    public function testTaskAssembler()
+    {
+        $mongo = new \MongoDB\Client();
+        $collectionDb = $mongo->selectDatabase('test')->selectCollection('test');
+        $adapter = new Mongo();
+        $adapter->setCollection($collectionDb);
+
+        $collection = new Collection($adapter);
+
+        $name = 'task_test';
+
+        $instance = $collection->getInstance($name);
+
+    }
 }

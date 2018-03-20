@@ -12,6 +12,8 @@
 
 
 namespace AndyDuneTest\TaskLock;
+use AndyDune\TaskLock\Example\TaskForAdapter;
+use AndyDune\TaskLock\TaskAssembler;
 
 use AndyDune\TaskLock\Adapter\Mongo;
 use AndyDune\TaskLock\Collection;
@@ -70,9 +72,108 @@ class UsingMongoAdapterTest extends TestCase
 
         $collection = new Collection($adapter);
 
-        $name = 'task_test';
+        $collection->getInstance('chupa')->delete();
+        $collection->getInstance(TaskForAdapter::class)->delete();
 
-        $instance = $collection->getInstance($name);
+        $task1 = new class{
+            protected $resultHolder;
+            public $exception = false;
+            public function setResultHolder($res)
+            {
+                $this->resultHolder = $res;
+            }
+
+            public function __invoke()
+            {
+                if ($this->exception) {
+                    throw new \Exception();
+                }
+                $this->resultHolder->setResult('chupa');
+            }
+        };
+
+        $init = new class{
+
+            public $classes = [];
+            public $results = [];
+
+            public function __invoke($instance)
+            {
+                $instance->setResultHolder($this);
+                $this->classes[] = get_class($instance);
+            }
+
+            public function setResult($result)
+            {
+                $this->results[] = $result;
+            }
+        };
+
+        $task = new TaskAssembler($collection);
+        $task->addInitializer($init);
+        $task->add($task1, 'chupa');
+        $task->execute();
+
+        $this->assertEquals(1, count($init->results));
+        $this->assertEquals(1, count($init->classes));
+        $this->assertEquals('chupa', current($init->results));
+
+        $init->results = [];
+        $task1->exception = true;
+
+        try {
+            $task->execute();
+            $this->assertTrue(false);
+        } catch (\Exception $e) {
+
+        }
+        $this->assertEquals(0, count($init->results));
+
+        $task1->exception = false;
+
+        $task->execute();
+        $this->assertEquals(0, count($init->results));
+
+        $collection->getInstance('chupa')->unlock();
+
+
+        $task->execute();
+        $this->assertEquals(1, count($init->results));
+
+        $init->results = [];
+
+        $task->add(TaskForAdapter::class);
+        $task->execute(true);
+        $this->assertEquals(1, count($init->results));
+        $this->assertEquals('chupa', current($init->results));
+
+        $init->results = [];
+        $task1->exception = true;
+
+        try {
+            $task->execute(true);
+            $this->assertTrue(false);
+        } catch (\Exception $e) {
+
+        }
+        $task1->exception = false;
+
+        $init->results = [];
+        $task->execute(true);
+        $this->assertEquals(1, count($init->results));
+        $this->assertEquals('remedy', current($init->results));
+
+        $collection->getInstance('chupa')->unlock();
+
+        $init->results = [];
+        $task->execute();
+
+        $this->assertEquals(2, count($init->results));
+        $this->assertEquals('chupa', array_shift($init->results));
+        $this->assertEquals('remedy', array_shift($init->results));
+
+        $collection->getInstance('chupa')->delete();
+        $collection->getInstance(TaskForAdapter::class)->delete();
 
     }
 }

@@ -109,6 +109,11 @@ class Instance
     }
 
 
+    public function delete()
+    {
+        $this->adapter->delete($this->name);
+    }
+
     public function lock()
     {
         $data = [

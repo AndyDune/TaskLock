@@ -26,6 +26,7 @@ class TaskAssembler
     protected $collection;
 
     protected $initializers = [];
+    protected $initializersApplyed = [];
 
     public function __construct(Collection $collection)
     {
@@ -40,9 +41,12 @@ class TaskAssembler
 
     public function add($instance, $name = null, $interval = null)
     {
-        $this->functions[] = [
+        if (!$name) {
+            $name = is_string($instance) ? $instance : get_class($instance);
+        }
+        $this->functions[$name] = [
             'function' => $instance,
-            'name' => $name ?? get_class($instance),
+            'name' => $name,
             'interval' => $interval ?? $this->interval,
         ];
         return $this;
@@ -51,7 +55,7 @@ class TaskAssembler
     public function execute($breakOnExecute = false)
     {
         $executed = 0;
-        foreach ($this->functions as $row) {
+        foreach ($this->functions as $key => $row) {
             $instance = $this->collection->getInstance($row['name']);
             if (!$instance->isReady()) {
                 continue;
@@ -59,10 +63,13 @@ class TaskAssembler
             $instance->lock();
             $function = $row['function'];
             if (is_string($function)) {
-                $function = new $function;
-                $this->initialize($instance);
+                $this->functions[$key]['function'] = $function = new $function;
             }
-            $this->initialize($instance);
+            // Fir execution repeat
+            if (!in_array($row['name'], $this->initializersApplyed)) {
+                $this->initializersApplyed[] = $row['name'];
+                $this->initialize($function);
+            }
 
             $executed++;
             call_user_func($function);
@@ -83,6 +90,7 @@ class TaskAssembler
      */
     public function addInitializer(callable $initializer)
     {
+        $this->initializersApplyed = [];
         $this->initializers[] = $initializer;
         return $this;
     }

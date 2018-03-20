@@ -72,9 +72,15 @@ class TaskAssembler
             }
 
             $executed++;
-            call_user_func($function);
 
-            $instance->unlock($row['interval']);
+            try {
+                call_user_func($function);
+                $interval = $row['interval'];
+            } catch (TaskAssemblerException $e) {
+                $interval = $e->getNextExecutionDelay();
+            }
+
+            $instance->unlock($interval);
             if ($breakOnExecute) {
                 break;
             }

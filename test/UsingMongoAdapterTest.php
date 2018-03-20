@@ -18,6 +18,7 @@ use AndyDune\TaskLock\TaskAssembler;
 use AndyDune\TaskLock\Adapter\Mongo;
 use AndyDune\TaskLock\Collection;
 use AndyDune\TaskLock\Instance;
+use AndyDune\TaskLock\TaskAssemblerException;
 use PHPUnit\Framework\TestCase;
 
 
@@ -174,6 +175,47 @@ class UsingMongoAdapterTest extends TestCase
 
         $collection->getInstance('chupa')->delete();
         $collection->getInstance(TaskForAdapter::class)->delete();
+
+
+
+        $task1 = new class{
+            protected $resultHolder;
+            public $exception = false;
+            public function setResultHolder($res)
+            {
+                $this->resultHolder = $res;
+            }
+
+            public function __invoke()
+            {
+                $this->resultHolder->setResult('chupa');
+                $ex = new TaskAssemblerException();
+                $ex->setNextExecutionDelay(20);
+                throw $ex;
+            }
+        };
+
+        $task = new TaskAssembler($collection);
+        $task->addInitializer($init);
+        $task->add($task1, 'chupa');
+
+        $init->results = [];
+        $task->execute();
+        $this->assertEquals(1, count($init->results));
+
+
+        $init->results = [];
+        $task->execute();
+        $this->assertEquals(0, count($init->results));
+
+        $collectionDb->updateOne(['name' => 'chupa'], ['$set' => ['datetime_next' => time()]]);
+
+        $init->results = [];
+        $task->execute();
+        $this->assertEquals(1, count($init->results));
+
+
+        $collection->getInstance('chupa')->delete();
 
     }
 }

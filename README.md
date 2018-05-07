@@ -31,3 +31,8 @@ And execute command:
 ```
 php composer.phar update
 ```
+
+Use it command if you don not need dev code:
+```
+php composer.phar update --no-dev
+```

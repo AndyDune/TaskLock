@@ -218,4 +218,39 @@ class UsingMongoAdapterTest extends TestCase
         $collection->getInstance('chupa')->delete();
 
     }
+
+    public function testTaskAssemblerException()
+    {
+        $mongo = new \MongoDB\Client();
+        $collectionDb = $mongo->selectDatabase('test')->selectCollection('test');
+        $adapter = new Mongo();
+        $adapter->setCollection($collectionDb);
+
+        $collection = new Collection($adapter);
+
+        $collection->getInstance('chupa')->delete();
+        $collection->getInstance(TaskForAdapter::class)->delete();
+
+        $task1 = new class{
+
+            public function __invoke()
+            {
+                throw new TaskAssemblerException('Error');
+            }
+        };
+
+        $dateTime = date('Y-m-d H:i:s', time() - 10);
+
+
+        $task = new TaskAssembler($collection);
+        $task->add($task1, 'chupa');
+        $task->execute();
+
+        $instance = $collection->getInstance('chupa');
+
+
+        $this->assertEquals('Error', $instance->getMeta('exception_message'));
+        $this->assertGreaterThan($dateTime, $instance->getMeta('exception_datetime'));
+
+    }
 }

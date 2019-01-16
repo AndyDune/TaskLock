@@ -78,6 +78,8 @@ class TaskAssembler
                 $interval = $row['interval'];
             } catch (TaskAssemblerException $e) {
                 $interval = $e->getNextExecutionDelay();
+                $instance->setMeta('exception_message', $e->getMessage());
+                $instance->setMeta('exception_datetime', date('Y-m-d H:i:s'));
             }
 
             $instance->unlock($interval);

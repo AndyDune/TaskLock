@@ -15,7 +15,7 @@ namespace AndyDune\TaskLock;
 
 class TaskAssemblerException extends \Exception
 {
-    protected $nextExecutionDelay = null;
+    protected $nextExecutionDelay = 0;
 
     /**
      * @return null|int

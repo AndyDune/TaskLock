@@ -28,6 +28,8 @@ class TaskAssembler
     protected $initializers = [];
     protected $initializersApplyed = [];
 
+    protected $results = [];
+
     public function __construct(Collection $collection)
     {
         $this->collection = $collection;
@@ -74,7 +76,7 @@ class TaskAssembler
             $executed++;
 
             try {
-                call_user_func($function);
+                $this->results[$row['name']] = call_user_func($function);
                 $interval = $row['interval'];
             } catch (TaskAssemblerException $e) {
                 $interval = $e->getNextExecutionDelay();
@@ -112,6 +114,11 @@ class TaskAssembler
             $initializer($instance);
         }
         return;
+    }
+
+    public function getResults()
+    {
+        return $this->results;
     }
 
 }

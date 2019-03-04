@@ -12,6 +12,7 @@
 
 
 namespace AndyDuneTest\TaskLock;
+
 use AndyDune\TaskLock\Example\TaskForAdapter;
 use AndyDune\TaskLock\TaskAssembler;
 
@@ -76,9 +77,11 @@ class UsingMongoAdapterTest extends TestCase
         $collection->getInstance('chupa')->delete();
         $collection->getInstance(TaskForAdapter::class)->delete();
 
-        $task1 = new class{
+        $task1 = new class
+        {
             protected $resultHolder;
             public $exception = false;
+
             public function setResultHolder($res)
             {
                 $this->resultHolder = $res;
@@ -93,7 +96,8 @@ class UsingMongoAdapterTest extends TestCase
             }
         };
 
-        $init = new class{
+        $init = new class
+        {
 
             public $classes = [];
             public $results = [];
@@ -177,10 +181,11 @@ class UsingMongoAdapterTest extends TestCase
         $collection->getInstance(TaskForAdapter::class)->delete();
 
 
-
-        $task1 = new class{
+        $task1 = new class
+        {
             protected $resultHolder;
             public $exception = false;
+
             public function setResultHolder($res)
             {
                 $this->resultHolder = $res;
@@ -231,7 +236,8 @@ class UsingMongoAdapterTest extends TestCase
         $collection->getInstance('chupa')->delete();
         $collection->getInstance(TaskForAdapter::class)->delete();
 
-        $task1 = new class{
+        $task1 = new class
+        {
 
             public function __invoke()
             {
@@ -252,5 +258,41 @@ class UsingMongoAdapterTest extends TestCase
         $this->assertEquals('Error', $instance->getMeta('exception_message'));
         $this->assertGreaterThan($dateTime, $instance->getMeta('exception_datetime'));
 
+    }
+
+    public function testTaskAssemblerResults()
+    {
+        $mongo = new \MongoDB\Client();
+        $collectionDb = $mongo->selectDatabase('test')->selectCollection('test');
+        $adapter = new Mongo();
+        $adapter->setCollection($collectionDb);
+
+        $collection = new Collection($adapter);
+
+        $collection->getInstance('chupa')->delete();
+        $collection->getInstance(TaskForAdapter::class)->delete();
+
+        $task1 = new class
+        {
+            public function __invoke()
+            {
+                return 1;
+            }
+        };
+
+        $task = new TaskAssembler($collection);
+        $task->add($task1, 'chupa', 10);
+        $task->execute();
+
+        $results = $task->getResults();
+        $this->assertCount(1, $results);
+        $this->assertEquals(1, $results['chupa']);
+
+
+        $task = new TaskAssembler($collection);
+        $task->add($task1, 'chupa', 10);
+        $task->execute();
+        $results = $task->getResults();
+        $this->assertCount(0, $results);
     }
 }

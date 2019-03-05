@@ -109,6 +109,21 @@ class Instance
     }
 
 
+    /**
+     * Change datetime for next execution.
+     *
+     * @param $seconds
+     * @return $this
+     */
+    public function setDatetimeNext($seconds) : self
+    {
+        $data = [
+            'datetime_next' => $this->formatDatetime(time() + $seconds),
+        ];
+        $this->adapter->set($this->name, $data);
+        return $this;
+    }
+
     public function delete()
     {
         $this->adapter->delete($this->name);

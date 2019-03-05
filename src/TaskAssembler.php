@@ -54,6 +54,18 @@ class TaskAssembler
         return $this;
     }
 
+    /**
+     * @param string $name
+     * @param int $interval
+     * @return $this
+     */
+    public function changeTimeInterval($name, $interval = 0)
+    {
+        $instance = $this->collection->getInstance($name);
+        $instance->setDatetimeNext($interval);
+        return $this;
+    }
+
     public function execute($breakOnExecute = false)
     {
         $executed = 0;

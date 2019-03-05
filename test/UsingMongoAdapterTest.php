@@ -260,6 +260,10 @@ class UsingMongoAdapterTest extends TestCase
 
     }
 
+    /**
+     * @covers \AndyDune\TaskLock\TaskAssembler::changeTimeInterval
+     * @covers \AndyDune\TaskLock\Instance::setDatetimeNext
+     */
     public function testTaskAssemblerResults()
     {
         $mongo = new \MongoDB\Client();
@@ -288,11 +292,22 @@ class UsingMongoAdapterTest extends TestCase
         $this->assertCount(1, $results);
         $this->assertEquals(1, $results['chupa']);
 
-
+        sleep(1);
+        
         $task = new TaskAssembler($collection);
         $task->add($task1, 'chupa', 10);
         $task->execute();
         $results = $task->getResults();
         $this->assertCount(0, $results);
+
+        $task = new TaskAssembler($collection);
+        $task->changeTimeInterval('chupa', 0);
+
+        $task = new TaskAssembler($collection);
+        $task->add($task1, 'chupa', 10);
+        $task->execute();
+
+        $results = $task->getResults();
+        $this->assertCount(1, $results);
     }
 }

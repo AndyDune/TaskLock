@@ -65,6 +65,9 @@ class UsingMongoAdapterTest extends TestCase
         $this->assertTrue($instance->isReady());
     }
 
+    /**
+     * @covers \AndyDune\TaskLock\TaskAssembler::getCollection
+     */
     public function testTaskAssembler()
     {
         $mongo = new \MongoDB\Client();
@@ -115,6 +118,9 @@ class UsingMongoAdapterTest extends TestCase
         };
 
         $task = new TaskAssembler($collection);
+
+        $this->assertInstanceOf(get_class($collection), $task->getCollection());
+
         $task->addInitializer($init);
         $task->add($task1, 'chupa');
         $task->execute();
@@ -293,7 +299,7 @@ class UsingMongoAdapterTest extends TestCase
         $this->assertEquals(1, $results['chupa']);
 
         sleep(1);
-        
+
         $task = new TaskAssembler($collection);
         $task->add($task1, 'chupa', 10);
         $task->execute();

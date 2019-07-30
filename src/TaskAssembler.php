@@ -21,6 +21,14 @@ class TaskAssembler
     protected $functions = [];
 
     /**
+     * @return Collection
+     */
+    public function getCollection(): Collection
+    {
+        return $this->collection;
+    }
+
+    /**
      * @var Collection
      */
     protected $collection;
@@ -34,6 +42,8 @@ class TaskAssembler
     {
         $this->collection = $collection;
     }
+
+
 
     public function setInterval($int)
     {

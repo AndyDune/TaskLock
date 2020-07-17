@@ -6,7 +6,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/andydune/task-lock.svg?style=flat-square)](https://packagist.org/packages/andydune/task-lock)
 
 
-Usefull for control tasks to avoid parallel job. It support MongoDB or files.
+It is usefull for control tasks to avoid parallel job. It support MongoDB or files.
 
 Installation
 ------------
